@@ -1,7 +1,10 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import WallCell from './WallCell';
 import PathCell from './PathCell';
+import StartCell from './StartCell';
+import GoalCell from './GoalCell';
 
+/*
 const grid = [
     [
         "#",
@@ -487,8 +490,29 @@ const grid = [
         "#"
     ]
 ];
+*/
 
 function MazeGrid() {
+
+    const [grid, setGrid] = useState([]);
+
+    useEffect(() => {
+        const fetchMaze = async () => {
+        try {
+            const response = await fetch('http://localhost:8080/generate?n=20');
+            const data = await response.json();
+            setGrid(data);
+        } catch (error) {
+            console.error("Failed to fetch maze:", error);
+        }
+        };
+
+        fetchMaze();
+    }, []); 
+
+    if (grid.length === 0) {
+        return <div>Loading...</div>;
+    }
 
   return (
     
@@ -497,18 +521,20 @@ function MazeGrid() {
             gridTemplateColumns: `repeat(${grid[0].length}, 1fr)`}}>
             {
                 grid.map((rowArr, rowIndex) => (
-                // Map over each row array
                 <React.Fragment key={rowIndex}>
                     {rowArr.map((cellValue, colIndex) => {
-                        // For each cell in the row
                         const key = `${rowIndex}-${colIndex}`;
                         
-                        if (cellValue === '#') {
-                            return <WallCell key={key} />;
-                        } 
-                        
-                        // For '.', 'S', 'G', or any other path/start/goal cell
-                        return <PathCell key={key} />;
+                        switch(cellValue){
+                            case '#':
+                                return <WallCell key={key} />;
+                            case 'S':
+                                return <StartCell key={key}/>
+                            case 'G':
+                                return <GoalCell key={key}/>
+                            default:
+                                return <PathCell key={key}/>
+                        }
                     })}
                 </React.Fragment>
             ))}

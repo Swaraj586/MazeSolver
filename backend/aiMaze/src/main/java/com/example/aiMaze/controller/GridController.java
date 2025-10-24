@@ -1,16 +1,15 @@
 package com.example.aiMaze.controller;
 
 import com.example.aiMaze.utility.MazeAStarSolver;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.example.aiMaze.utility.Maze_Generator;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 public class GridController {
 
-    @PostMapping("/generate")
-    public String[][] gridCreater(@RequestBody int n){
+    @GetMapping("/generate")
+    public String[][] gridCreater(@RequestParam int n){
         Maze_Generator maze = new Maze_Generator(n);
         String[][] grid = maze.compute();
         return grid;
