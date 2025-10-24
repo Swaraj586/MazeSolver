@@ -7,16 +7,21 @@ import java.util.Stack;
 
 public class Maze_Generator {
 
+    Random ran = new Random();
     int n;
     String[][] maze;
     int[] start;
+
     public Maze_Generator(int n){
         this.n = n;
         maze=new String[n+1][n+1];
         start=new int[2];
-        start[0]=5;
-        start[1]=5;
+        int x=ran.nextInt(n);
+        int y=ran.nextInt(n);
+        start[0]=(x==0)?1:x;
+        start[1]=(y==0)?1:y;
     }
+
     void fill(){
         for(int i=0;i<=n;i++){
             for(int j=0;j<=n;j++){
@@ -26,16 +31,13 @@ public class Maze_Generator {
     }
     
     void generate() {
-        Random ran = new Random();
         Stack<int[]> stack = new Stack<>();
 
         int x = start[0];
         int y = start[1];
 
-        maze[x][y] = "S";
         stack.push(new int[]{x, y});
 
-        // We'll use these to store the goal coordinates
         int goalX = x;
         int goalY = y;
         boolean goalPlaced = false;
@@ -70,11 +72,8 @@ public class Maze_Generator {
 
                 stack.push(chosen);
             } else {
-                // This is a dead end. Time to backtrack (pop).
                 int[] popped = stack.pop();
 
-                // Store the coordinates of the *first* dead end we find.
-                // This will be the deepest point in the maze.
                 if (!goalPlaced) {
                     goalX = popped[0];
                     goalY = popped[1];
@@ -83,10 +82,8 @@ public class Maze_Generator {
             }
         }
 
-        // Now, place 'G' at the coordinates we saved.
         maze[goalX][goalY] = "G";
 
-        // And ensure 'S' is still at the start.
         maze[start[0]][start[1]] = "S";
     }
 
