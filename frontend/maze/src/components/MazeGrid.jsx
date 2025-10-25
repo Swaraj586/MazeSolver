@@ -4,494 +4,11 @@ import PathCell from './PathCell';
 import StartCell from './StartCell';
 import GoalCell from './GoalCell';
 import TrailCell from './TrailCell';
+import { useLocation, useNavigate } from 'react-router-dom';
+import ReactConfetti from 'react-confetti';
+import { useWindowSize } from 'react-use'
 
-/*
-const grid = [
-    [
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#"
-    ],
-    [
-        "#",
-        ".",
-        ".",
-        ".",
-        ".",
-        ".",
-        ".",
-        ".",
-        ".",
-        ".",
-        ".",
-        ".",
-        ".",
-        ".",
-        ".",
-        ".",
-        ".",
-        ".",
-        "#",
-        ".",
-        "#"
-    ],
-    [
-        "#",
-        ".",
-        "#",
-        "#",
-        "#",
-        ".",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        ".",
-        "#",
-        ".",
-        "#"
-    ],
-    [
-        "#",
-        ".",
-        "#",
-        ".",
-        "#",
-        ".",
-        ".",
-        ".",
-        ".",
-        ".",
-        ".",
-        ".",
-        "#",
-        ".",
-        ".",
-        ".",
-        "#",
-        ".",
-        ".",
-        ".",
-        "#"
-    ],
-    [
-        "#",
-        ".",
-        "#",
-        ".",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        ".",
-        "#",
-        ".",
-        "#",
-        ".",
-        "#",
-        "#",
-        "#",
-        ".",
-        "#"
-    ],
-    [
-        "#",
-        ".",
-        ".",
-        ".",
-        "#",
-        "S",
-        ".",
-        ".",
-        ".",
-        ".",
-        "#",
-        ".",
-        ".",
-        ".",
-        "#",
-        ".",
-        "#",
-        ".",
-        ".",
-        ".",
-        "#"
-    ],
-    [
-        "#",
-        "#",
-        "#",
-        ".",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        ".",
-        "#",
-        ".",
-        "#",
-        "#",
-        "#",
-        ".",
-        "#",
-        "#",
-        "#",
-        ".",
-        "#"
-    ],
-    [
-        "#",
-        ".",
-        ".",
-        ".",
-        "#",
-        ".",
-        ".",
-        ".",
-        "#",
-        ".",
-        "#",
-        ".",
-        "#",
-        ".",
-        "#",
-        ".",
-        ".",
-        ".",
-        "#",
-        "G",
-        "#"
-    ],
-    [
-        "#",
-        ".",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        ".",
-        "#",
-        ".",
-        "#",
-        ".",
-        "#",
-        ".",
-        "#",
-        "#",
-        "#",
-        ".",
-        "#",
-        "#",
-        "#"
-    ],
-    [
-        "#",
-        ".",
-        ".",
-        ".",
-        "#",
-        ".",
-        ".",
-        ".",
-        "#",
-        ".",
-        "#",
-        ".",
-        ".",
-        ".",
-        ".",
-        ".",
-        "#",
-        ".",
-        ".",
-        ".",
-        "#"
-    ],
-    [
-        "#",
-        "#",
-        "#",
-        ".",
-        "#",
-        ".",
-        "#",
-        ".",
-        "#",
-        ".",
-        "#",
-        "#",
-        "#",
-        ".",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        ".",
-        "#"
-    ],
-    [
-        "#",
-        ".",
-        ".",
-        ".",
-        ".",
-        ".",
-        "#",
-        ".",
-        "#",
-        ".",
-        "#",
-        ".",
-        ".",
-        ".",
-        "#",
-        ".",
-        ".",
-        ".",
-        ".",
-        ".",
-        "#"
-    ],
-    [
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        ".",
-        "#",
-        ".",
-        "#",
-        "#",
-        "#",
-        ".",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#"
-    ],
-    [
-        "#",
-        ".",
-        ".",
-        ".",
-        ".",
-        ".",
-        ".",
-        ".",
-        ".",
-        ".",
-        "#",
-        ".",
-        ".",
-        ".",
-        "#",
-        ".",
-        ".",
-        ".",
-        ".",
-        ".",
-        "#"
-    ],
-    [
-        "#",
-        ".",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        ".",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        ".",
-        "#"
-    ],
-    [
-        "#",
-        ".",
-        "#",
-        ".",
-        ".",
-        ".",
-        ".",
-        ".",
-        ".",
-        ".",
-        "#",
-        ".",
-        "#",
-        ".",
-        ".",
-        ".",
-        "#",
-        ".",
-        ".",
-        ".",
-        "#"
-    ],
-    [
-        "#",
-        ".",
-        "#",
-        ".",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        ".",
-        "#",
-        ".",
-        "#",
-        ".",
-        "#",
-        ".",
-        "#",
-        ".",
-        "#",
-        "#",
-        "#"
-    ],
-    [
-        "#",
-        ".",
-        "#",
-        ".",
-        ".",
-        ".",
-        "#",
-        ".",
-        ".",
-        ".",
-        "#",
-        ".",
-        "#",
-        ".",
-        "#",
-        ".",
-        "#",
-        ".",
-        ".",
-        ".",
-        "#"
-    ],
-    [
-        "#",
-        ".",
-        "#",
-        "#",
-        "#",
-        ".",
-        "#",
-        ".",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        ".",
-        "#",
-        ".",
-        "#",
-        "#",
-        "#",
-        ".",
-        "#"
-    ],
-    [
-        "#",
-        ".",
-        ".",
-        ".",
-        ".",
-        ".",
-        "#",
-        ".",
-        ".",
-        ".",
-        ".",
-        ".",
-        ".",
-        ".",
-        "#",
-        ".",
-        ".",
-        ".",
-        ".",
-        ".",
-        "#"
-    ],
-    [
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#",
-        "#"
-    ]
-];
-*/
+
 
 function MazeGrid() {
 
@@ -499,11 +16,15 @@ function MazeGrid() {
     const [path, setPath] = useState([]);
     const [currentStep, setCurrentStep] = useState(0);
     const [isAnimating, setIsAnimating] = useState(false);
-
+    const [isSolved, setIsSolved] = useState(false);
+    const navigate = useNavigate();
+    const location = useLocation();
+    const size = location.state?.n;
+    const {width,height} = useWindowSize();
     useEffect(() => {
         const fetchMaze = async () => {
         try {
-            const response = await fetch('http://localhost:8080/generate?n=20');
+            const response = await fetch(`http://localhost:8080/generate?n=${size}`);
             const data = await response.json();
             setGrid(data);
         } catch (error) {
@@ -516,10 +37,15 @@ function MazeGrid() {
 
 
     useEffect(() => {
-        if (!isAnimating || currentStep >= path.length) {
-            if (isAnimating) setIsAnimating(false); 
+        if (!isAnimating) {
             return; 
         }
+        if (currentStep >= path.length) {
+            setIsAnimating(false);
+            setIsSolved(true); 
+            return;
+        }
+        
 
         const timer = setTimeout(() => {
             
@@ -566,6 +92,16 @@ function MazeGrid() {
         }
     };
 
+    useEffect(() => {
+        if (isSolved) {
+            const confettiTimer = setTimeout(() => {
+                setIsSolved(false); 
+            }, 5000); 
+            
+            return () => clearTimeout(confettiTimer);
+        }
+    }, [isSolved]);
+
 
     if (grid.length === 0) {
         return <div>Loading...</div>;
@@ -573,7 +109,9 @@ function MazeGrid() {
 
   return (
         <> 
-            <div style={{ padding: '1rem', textAlign: 'center' }}>
+            {isSolved && <ReactConfetti width={width} height={height} recycle={false} numberOfPieces={500}/>}
+            <div style={{ padding: '1rem', textAlign: 'center' }} className='flex justify-around items-center gap-7'>
+                <button onClick={()=>{navigate('/')}}>Back</button>
                 <button 
                     onClick={handleSolveClick}
                     disabled={isAnimating} 
@@ -589,6 +127,7 @@ function MazeGrid() {
                 >
                     {isAnimating ? 'Solving...' : 'Solve Maze'}
                 </button>
+                <button onClick={()=>{window.location.reload();}}>New Maze</button>
             </div>
             
             <div style={{ 
