@@ -36,6 +36,8 @@ public class Maze_Generator {
         int x = start[0];
         int y = start[1];
 
+        maze[x][y] = "S";
+
         stack.push(new int[]{x, y});
 
         int goalX = x;

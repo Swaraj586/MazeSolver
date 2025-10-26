@@ -1,6 +1,6 @@
 function GoalCell() {
   return (
-    <div className="h-10 w-10 bg-yellow-400"></div>
+    <div className="h-10 w-10 bg-red-600"></div>
   );
 }
 
