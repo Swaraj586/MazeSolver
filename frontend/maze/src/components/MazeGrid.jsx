@@ -21,6 +21,19 @@ function MazeGrid() {
     const location = useLocation();
     const size = location.state?.n;
     const {width,height} = useWindowSize();
+    const fetchMaze = async () => {
+        try {
+            setIsAnimating(false);
+            setIsSolved(false);
+            setPath([]);
+            setCurrentStep(0);
+            const response = await fetch(`https://maze-backend-1.onrender.com/generate?n=${size}`);
+            const data = await response.json();
+            setGrid(data);
+        } catch (error) {
+            console.error("Failed to fetch maze:", error);
+        }
+        };
     useEffect(() => {
         const fetchMaze = async () => {
         try {
@@ -127,7 +140,7 @@ function MazeGrid() {
                 >
                     {isAnimating ? 'Solving...' : 'Solve Maze'}
                 </button>
-                <button onClick={()=>{window.location.reload();}}>New Maze</button>
+                <button onClick={fetchMaze}>New Maze</button>
             </div>
             
             <div style={{ 
