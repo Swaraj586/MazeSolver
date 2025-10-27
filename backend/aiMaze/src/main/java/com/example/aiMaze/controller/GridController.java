@@ -4,7 +4,7 @@ import com.example.aiMaze.utility.MazeAStarSolver;
 import org.springframework.web.bind.annotation.*;
 import com.example.aiMaze.utility.Maze_Generator;
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = {"*"})
 @RestController
 public class GridController {
 
