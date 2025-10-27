@@ -24,7 +24,7 @@ function MazeGrid() {
     useEffect(() => {
         const fetchMaze = async () => {
         try {
-            const response = await fetch(`http://localhost:8080/generate?n=${size}`);
+            const response = await fetch(`https://maze-backend-vtqe.onrender.com/generate?n=${size}`);
             const data = await response.json();
             setGrid(data);
         } catch (error) {
@@ -76,7 +76,7 @@ function MazeGrid() {
 
     const handleSolveClick = async () => {
         try {
-            const response = await fetch('http://localhost:8080/solve', {
+            const response = await fetch('https://maze-backend-vtqe.onrender.com/solve', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(grid)
