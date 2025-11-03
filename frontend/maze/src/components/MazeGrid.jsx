@@ -19,7 +19,7 @@ function MazeGrid() {
     const [isSolved, setIsSolved] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
-    const size = location.state?.n;
+    const size = (location.state?.n)/2;
     const {width,height} = useWindowSize();
     const fetchMaze = async () => {
         try {
@@ -27,7 +27,8 @@ function MazeGrid() {
             setIsSolved(false);
             setPath([]);
             setCurrentStep(0);
-            const response = await fetch(`https://maze-backend-1.onrender.com/generate?n=${size}`);
+            //const response = await fetch(`https://maze-backend-1.onrender.com/generate?n=${size}`);
+            const response = await fetch(`http://localhost:8080/generate?n=${size}`);
             const data = await response.json();
             setGrid(data);
         } catch (error) {
@@ -37,7 +38,8 @@ function MazeGrid() {
     useEffect(() => {
         const fetchMaze = async () => {
         try {
-            const response = await fetch(`https://maze-backend-1.onrender.com/generate?n=${size}`);
+            //const response = await fetch(`https://maze-backend-1.onrender.com/generate?n=${size}`);
+            const response = await fetch(`http://localhost:8080/generate?n=${size}`);
             const data = await response.json();
             setGrid(data);
         } catch (error) {
@@ -89,7 +91,12 @@ function MazeGrid() {
 
     const handleSolveClick = async () => {
         try {
-            const response = await fetch('https://maze-backend-1.onrender.com/solve', {
+            // const response = await fetch('https://maze-backend-1.onrender.com/solve', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify(grid)
+            // });
+            const response = await fetch('http://localhost:8080/solve', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(grid)
