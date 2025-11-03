@@ -1,6 +1,8 @@
 package com.example.aiMaze.controller;
 
+import com.example.aiMaze.utility.AStarEuclid;
 import com.example.aiMaze.utility.MazeAStarSolver;
+import com.example.aiMaze.utility.MazeSolutionResponse;
 import org.springframework.web.bind.annotation.*;
 import com.example.aiMaze.utility.Maze_Generator;
 
@@ -16,9 +18,16 @@ public class GridController {
     }
 
     @PostMapping("/solve")
-    public int[][] gridSolver(@RequestBody char[][] grid){
+    public MazeSolutionResponse gridSolver(@RequestBody char[][] grid){
         MazeAStarSolver solve = new MazeAStarSolver(grid);
-        int[][] solution = solve.compute_path();
+        MazeSolutionResponse solution = solve.compute_path();
+        return solution;
+    }
+
+    @PostMapping("/solveE")
+    public MazeSolutionResponse gridSolverE(@RequestBody char[][] grid){
+        AStarEuclid solve = new AStarEuclid(grid);
+        MazeSolutionResponse solution = solve.compute_path();
         return solution;
     }
 

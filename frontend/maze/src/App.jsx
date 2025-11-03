@@ -6,6 +6,7 @@ import MazeGrid from './components/MazeGrid'
 import Nav from './components/Nav'
 import { Route, Routes, useNavigate } from 'react-router-dom'
 import Home from './components/Home'
+import MazeG from './components/MazeG'
 
 function App() {
   const [count, setCount] = useState(0)

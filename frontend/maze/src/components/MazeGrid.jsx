@@ -1,4 +1,14 @@
 import React, { useEffect, useState } from 'react'
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
+} from 'recharts';
 import WallCell from './WallCell';
 import PathCell from './PathCell';
 import StartCell from './StartCell';
@@ -7,6 +17,7 @@ import TrailCell from './TrailCell';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ReactConfetti from 'react-confetti';
 import { useWindowSize } from 'react-use'
+import ExploredCell from './ExploredCell';
 
 
 
@@ -14,8 +25,13 @@ function MazeGrid() {
 
     const [grid, setGrid] = useState([]);
     const [path, setPath] = useState([]);
+    const [time, setTime] = useState(0);
+    const [time1,setTime1] = useState(0);
+    const [vis,setVis] = useState([]);
+    const [data,setData] = useState([]);
     const [currentStep, setCurrentStep] = useState(0);
     const [isAnimating, setIsAnimating] = useState(false);
+    const [isExploring,setIsExploring] = useState(false);
     const [isSolved, setIsSolved] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
@@ -26,8 +42,11 @@ function MazeGrid() {
             setIsAnimating(false);
             setIsSolved(false);
             setPath([]);
+            setData([]);
             setCurrentStep(0);
-            const response = await fetch(`https://maze-backend-1.onrender.com/generate?n=${size}`);
+            setTime(0);
+            setTime1(0);
+            const response = await fetch(`http://localhost:8080/generate?n=${size}`);
             const data = await response.json();
             setGrid(data);
         } catch (error) {
@@ -37,7 +56,7 @@ function MazeGrid() {
     useEffect(() => {
         const fetchMaze = async () => {
         try {
-            const response = await fetch(`https://maze-backend-1.onrender.com/generate?n=${size}`);
+            const response = await fetch(`http://localhost:8080/generate?n=${size}`);
             const data = await response.json();
             setGrid(data);
         } catch (error) {
@@ -50,18 +69,50 @@ function MazeGrid() {
 
 
     useEffect(() => {
-        if (!isAnimating) {
+        if (!isExploring && !isAnimating) {
+            
             return; 
         }
-        if (currentStep >= path.length) {
+        if(isExploring)
+        {
+            if (currentStep >= path.length) {
             setIsAnimating(false);
-            setIsSolved(true); 
+            // setIsSolved(true); 
             return;
         }
         
 
         const timer = setTimeout(() => {
-            
+            setGrid(prevGrid => {
+                const newGrid = prevGrid.map(row => [...row]);
+
+                const [x, y] = vis[currentStep];
+
+                if (newGrid[x][y] !== 'S' && newGrid[x][y] !== 'G') {
+                    newGrid[x][y] = 'E';
+                }
+                
+                if (currentStep + 1 < path.length) {
+                    const [nextX, nextY] = path[currentStep + 1];
+                    newGrid[nextX][nextY] = 'S';
+                }
+
+                return newGrid;
+            });
+            setCurrentStep(step => step + 1);
+
+        }, 100);
+
+        return () => clearTimeout(timer);
+        }
+        if(isAnimating)
+        {
+            if (currentStep >= path.length) {
+                setIsAnimating(false);
+                setIsSolved(true); 
+                return;
+            }
+            const timer = setTimeout(() => {
             setGrid(prevGrid => {
                 const newGrid = prevGrid.map(row => [...row]);
 
@@ -84,21 +135,45 @@ function MazeGrid() {
         }, 100);
 
         return () => clearTimeout(timer);
-    }, [isAnimating, currentStep, path]);
+    }
+    }, [isAnimating, currentStep, path,vis,isExploring]);
 
 
     const handleSolveClick = async () => {
         try {
-            const response = await fetch('https://maze-backend-1.onrender.com/solve', {
+            
+            const response1 = await fetch('http://localhost:8080/solveE', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(grid)
+            });
+            const solutionPath1 = await response1.json();
+            const response = await fetch('http://localhost:8080/solve', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(grid)
             });
             const solutionPath = await response.json();
+            setVis(solutionPath.visitedCells);
+            setPath(solutionPath.path);
+            setTime(solutionPath.time);
+            setTime1(solutionPath1.time);
 
-            setPath(solutionPath);
+            const chartData = [
+                { h_fnc: 'Manhattan', time_in_ns: solutionPath.time },
+                { h_fnc: 'Euclidean', time_in_ns: solutionPath1.time},
+                
+            ];
+            setData(chartData);
+
             setCurrentStep(0);
+            setIsExploring(true);
             setIsAnimating(true);
+            //setIsSolved(true);
+            
+            
+
+
 
         } catch (error) {
             console.error("Failed to solve maze:", error);
@@ -127,15 +202,11 @@ function MazeGrid() {
                 <button onClick={()=>{navigate('/')}}>Back</button>
                 <button 
                     onClick={handleSolveClick}
-                    disabled={isAnimating} 
+                    disabled={isAnimating}
                     style={{
-                        padding: '10px 20px',
-                        fontSize: '16px',
-                        cursor: 'pointer',
+                    
                         backgroundColor: isAnimating ? '#ccc' : '#4CAF50',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '5px'
+                        
                     }}
                 >
                     {isAnimating ? 'Solving...' : 'Solve Maze'}
@@ -162,6 +233,8 @@ function MazeGrid() {
                                         return <GoalCell key={key}/>
                                     case '*':
                                         return <TrailCell key={key}/>
+                                    case 'E':
+                                        return <ExploredCell key={key}/>
                                     default:
                                         return <PathCell key={key}/>
                                 }
@@ -169,7 +242,24 @@ function MazeGrid() {
                         </React.Fragment>
                     ))
                 }
+            
             </div>
+            {!isAnimating &&
+            <div className='bg-white rounded-4xl w-full flex flex-col items-center justify-between gap-10 m-20 p-15'>
+            <h1 className='text-black m-1.5'>Time utilized by both the heuristic functions</h1>
+            <ResponsiveContainer  width="100%" height={300}>
+      <BarChart 
+        data={data}
+        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+      >
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="h_fnc" />
+        <YAxis />
+        <Tooltip />
+        <Legend />
+        <Bar dataKey="time_in_ns" fill="#8884d8" />
+      </BarChart>
+    </ResponsiveContainer> </div>}
         </>
     )
 }

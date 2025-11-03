@@ -8,91 +8,136 @@ import java.util.Stack;
 public class Maze_Generator {
 
     Random ran = new Random();
-    int n;
-    String[][] maze;
-    int[] start;
+    int N,WALL,PATH,START,GOAL;
 
-    public Maze_Generator(int n){
-        this.n = n;
-        maze=new String[n+1][n+1];
-        start=new int[2];
-        int x=ran.nextInt(n);
-        int y=ran.nextInt(n);
-        start[0]=(x==0)?1:x;
-        start[1]=(y==0)?1:y;
+    public Maze_Generator(int N){
+        this.N = N;
+        this.WALL = 0;
+        this.PATH = 1;
+        this.START = 2;
+        this.GOAL = 3;
     }
 
-    void fill(){
-        for(int i=0;i<=n;i++){
-            for(int j=0;j<=n;j++){
-                maze[i][j]="#";
+    private record Point(int y, int x) {}
+
+    private class Frontier {
+        int wallY, wallX;
+        int oppY, oppX;
+
+        public Frontier(int wallY, int wallX, int oppY, int oppX) {
+            this.wallY = wallY;
+            this.wallX = wallX;
+            this.oppY = oppY;
+            this.oppX = oppX;
+        }
+    }
+
+    private void addFrontiers(int y, int x, List<Frontier> frontiers, int[][] maze) {
+        int height = maze.length;
+        int width = maze[0].length;
+        int[][] directions = { {-2, 0}, {2, 0}, {0, -2}, {0, 2} };
+
+        for (int[] dir : directions) {
+            int dy = dir[0];
+            int dx = dir[1];
+
+            int wallY = y + dy / 2;
+            int wallX = x + dx / 2;
+            int oppY = y + dy;
+            int oppX = x + dx;
+
+            if (oppY >= 0 && oppY < height &&
+                    oppX >= 0 && oppX < width &&
+                    maze[oppY][oppX] == WALL) {
+                frontiers.add(new Frontier(wallY, wallX, oppY, oppX));
             }
         }
     }
-    
-    void generate() {
-        Stack<int[]> stack = new Stack<>();
 
-        int x = start[0];
-        int y = start[1];
+    public int[][] createMaze(int height, int width) {
+        int mazeH = height * 2 + 1;
+        int mazeW = width * 2 + 1;
+        int[][] maze = new int[mazeH][mazeW];
 
-        maze[x][y] = "S";
+        List<Frontier> frontiers = new ArrayList<>();
 
-        stack.push(new int[]{x, y});
+        int startX = ran.nextInt(width) * 2 + 1;
+        int startY = ran.nextInt(height) * 2 + 1;
 
-        int goalX = x;
-        int goalY = y;
-        boolean goalPlaced = false;
+        maze[startY][startX] = PATH;
+        addFrontiers(startY, startX, frontiers, maze);
 
-        while (!stack.isEmpty()) {
-            int[] current = stack.peek();
-            x = current[0];
-            y = current[1];
+        while (!frontiers.isEmpty()) {
+            int index = ran.nextInt(frontiers.size());
+            Frontier f = frontiers.remove(index);
 
-            List<int[]> neighbors = new ArrayList<>();
-
-            if (x - 2 > 0 && maze[x - 2][y] == "#") {
-                neighbors.add(new int[]{x - 2, y});
+            if (maze[f.oppY][f.oppX] == WALL) {
+                maze[f.wallY][f.wallX] = PATH;
+                maze[f.oppY][f.oppX] = PATH;
+                addFrontiers(f.oppY, f.oppX, frontiers, maze);
             }
-            if (x + 2 < n && maze[x + 2][y] == "#") {
-                neighbors.add(new int[]{x + 2, y});
-            }
-            if (y - 2 > 0 && maze[x][y - 2] == "#") {
-                neighbors.add(new int[]{x, y - 2});
-            }
-            if (y + 2 < n && maze[x][y + 2] == "#") {
-                neighbors.add(new int[]{x, y + 2});
-            }
+        }
 
-            if (!neighbors.isEmpty()) {
-                int[] chosen = neighbors.get(ran.nextInt(neighbors.size()));
-                int nx = chosen[0];
-                int ny = chosen[1];
-
-                maze[(x + nx) / 2][(y + ny) / 2] = ".";
-                maze[nx][ny] = ".";
-
-                stack.push(chosen);
-            } else {
-                int[] popped = stack.pop();
-
-                if (!goalPlaced) {
-                    goalX = popped[0];
-                    goalY = popped[1];
-                    goalPlaced = true;
+        List<Point> pathCells = new ArrayList<>();
+        for (int y = 1; y < mazeH; y += 2) {
+            for (int x = 1; x < mazeW; x += 2) {
+                if (maze[y][x] == PATH) {
+                    pathCells.add(new Point(y, x));
                 }
             }
         }
 
-        maze[goalX][goalY] = "G";
+        if (pathCells.isEmpty()) {
+            return maze;
+        }
 
-        maze[start[0]][start[1]] = "S";
+        Point startCell = pathCells.get(ran.nextInt(pathCells.size()));
+
+        long maxDistSq = -1;
+        Point endCell = null;
+
+        for (Point cell : pathCells) {
+            long dy = startCell.y() - cell.y();
+            long dx = startCell.x() - cell.x();
+            long distSq = (dy * dy) + (dx * dx);
+
+            if (distSq > maxDistSq) {
+                maxDistSq = distSq;
+                endCell = cell;
+            }
+        }
+
+        maze[startCell.y()][startCell.x()] = START;
+        if (endCell != null) {
+            maze[endCell.y()][endCell.x()] = GOAL;
+        }
+
+        return maze;
+    }
+
+    public String[][] generate(int[][] maze) {
+        int n=maze.length;
+
+        String[][] cmaze = new String[n][n];
+
+        for(int i=0;i<n;i++){
+            for(int j=0;j<n;j++){
+                String ch=" ";
+                if(maze[i][j]==WALL) ch="#";
+                else if(maze[i][j]==PATH) ch=".";
+                else if(maze[i][j]==START) ch="S";
+                else if(maze[i][j]==GOAL) ch="G";
+                cmaze[i][j] = ch;
+            }
+        }
+
+        return cmaze;
     }
 
     public String[][] compute(){
-        this.fill();
-        this.generate();
-        return maze;
+        int[][] maze = createMaze(N,N);
+        String[][] cmaze = generate(maze);
+        return cmaze;
     }
-    
+
 }
