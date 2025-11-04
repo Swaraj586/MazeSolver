@@ -46,7 +46,6 @@ function MazeGrid() {
             setCurrentStep(0);
             setTime(0);
             setTime1(0);
-            //const response = await fetch(`http://localhost:8080/generate?n=${size}`);
             const response = await fetch(`http://localhost:8080/generate?n=${size}`);
             const data = await response.json();
             setGrid(data);
@@ -57,7 +56,6 @@ function MazeGrid() {
     useEffect(() => {
         const fetchMaze = async () => {
         try {
-            //const response = await fetch(`http://localhost:8080/generate?n=${size}`);
             const response = await fetch(`http://localhost:8080/generate?n=${size}`);
             const data = await response.json();
             setGrid(data);
@@ -150,11 +148,6 @@ function MazeGrid() {
                 body: JSON.stringify(grid)
             });
             const solutionPath1 = await response1.json();
-            // const response = await fetch('http://localhost:8080/solve', {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify(grid)
-            // });
             const response = await fetch('http://localhost:8080/solve', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
