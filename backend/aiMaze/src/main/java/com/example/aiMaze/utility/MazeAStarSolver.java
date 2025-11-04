@@ -1,11 +1,6 @@
 package com.example.aiMaze.utility;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.PriorityQueue;
+import java.util.*;
 
 
 public class MazeAStarSolver {
@@ -45,12 +40,14 @@ public class MazeAStarSolver {
         return Math.abs(current[0] - goal[0]) + Math.abs(current[1] - goal[1]);
     }
 
-    public static int[][] solveMaze(char[][] maze) {
+    public static MazeSolutionResponse solveMaze(char[][] maze) {
         int rows = maze.length;
         int cols = maze[0].length;
         int[] start = null;
         int[] goal = null;
-
+        Set<NodePath> closedSet = new HashSet<>();      /////////////
+        List<int[]> visitedCells = new ArrayList<>();   //////////////
+        long startTime = System.nanoTime();
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {
                 if (maze[r][c] == 'S') {
@@ -63,7 +60,7 @@ public class MazeAStarSolver {
 
         if (start == null || goal == null) {
             System.err.println("Error: Start (S) or Goal (G) not found in the maze.");
-            return new int[0][0]; 
+            return new MazeSolutionResponse(0,new int[0][0],visitedCells);
         }
         
         PriorityQueue<NodePath> pq = new PriorityQueue<>(
@@ -77,6 +74,8 @@ public class MazeAStarSolver {
         NodePath startNode = new NodePath(hStart, 0, start, null);
         
         pq.add(startNode);
+        visitedCells.add(new int[]{startNode.current[0], startNode.current[1]}); //////////
+        closedSet.add(startNode);  /////////////
         gCostMap.put(startNode.getKey(), 0);
 
         while (!pq.isEmpty()) {
@@ -84,7 +83,10 @@ public class MazeAStarSolver {
             int[] currentPoint = current.current;
 
             if (currentPoint[0] == goal[0] && currentPoint[1] == goal[1]) {
-                return reconstructPath(current);
+                long endTime = System.nanoTime();
+                long totalTime = endTime-startTime;
+                System.out.println(totalTime);
+                return new MazeSolutionResponse(totalTime,reconstructPath(current),visitedCells);
             }
             
             if (current.gCost > gCostMap.getOrDefault(current.getKey(), Integer.MAX_VALUE)) {
@@ -115,11 +117,16 @@ public class MazeAStarSolver {
                     gCostMap.put(neighborKey, tentativeGCost);
                     
                     pq.add(nextNode);
+                    if(!closedSet.contains(nextNode))
+                    {
+                        visitedCells.add(new int[]{nextNode.current[0],nextNode.current[1]});
+                        closedSet.add(nextNode);
+                    }
                 }
             }
         }
 
-        return new int[0][0];
+        return new MazeSolutionResponse(0,new int[0][0],visitedCells);
     }
 
     private static int[][] reconstructPath(NodePath goalNode) {
@@ -133,8 +140,8 @@ public class MazeAStarSolver {
         return pathList.toArray(new int[0][]);
     }
 
-    public int[][] compute_path(){
-        int[][] path = solveMaze(maze);
+    public MazeSolutionResponse compute_path(){
+        MazeSolutionResponse path = solveMaze(maze);
         return path;
     }
 
